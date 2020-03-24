@@ -1,3 +1,8 @@
+import random
+
+
+def random_list_num(n):
+    return [random.randrange(0, 1000) for _ in range(n)]
 
 
 def select_sort(xlist):
@@ -30,9 +35,42 @@ def insert_sort(xlist):
     return ylist
 
 
+def quick_sort(xlist, left, right):
+    pivot = xlist[(left + right) // 2]
+    leftb = left
+    while left <= right:
+        while xlist[left] < pivot:
+            left += 1
+        while pivot < xlist[right]:
+            right -= 1
+        if left <= right:
+            temp = xlist[left]
+            xlist[left] = xlist[right]
+            xlist[right] = temp
+            left += 1
+            right -= 1
+    if leftb < right:
+        quick_sort(xlist, leftb, right)
+    if pivot > left:
+        quick_sort(xlist, left, pivot)
+    #print("left")
+    #quick_sort(xlist, leftb, pivot)
+    #print("right")
+    #quick_sort(xlist, pivot+1, rightb)
 
-def quick_sort(xlist):
-    pivot = 
+
+def q_sort(xlist):
+    quick_sort(xlist, 0, len(xlist)-1)
+    return xlist
+
+
+alist = [9, 6, 4, 3, 7, 8, 1, 2, 10, 5]
+print(alist)
+print(q_sort(alist))
+
+
+
+
 
 
 
