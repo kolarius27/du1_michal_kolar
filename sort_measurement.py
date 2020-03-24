@@ -1,4 +1,5 @@
 import random
+import time
 
 
 def random_list_num(n):
@@ -61,25 +62,72 @@ def q_sort(xlist):
     return xlist
 
 
-for k in range(3, 11, 1):
-    a_list = random_list_num(4 ^ k)
-    b_list = a_list.sort
-    c_list = a_list
-    for p in range(len(a_list) // 100):
-        i = random.randint(0, len(a_list))
-        j = random.randint(0, len(a_list))
+def int_list_generating(k):
+    alist = random_list_num(4 ** k)
+    blist = alist
+    blist.sort()
+    clist = alist
+    for _ in range(len(alist) // 100):
+        i = random.randint(0, len(alist))
+        print(i)
+        j = random.randint(0, len(alist))
         while i == j:
-            j = random.randint(0, len(a_list))
-        temp = c_list[i]
-        c_list[i] = c_list[j]
-        c_list[j] = temp
+            j = random.randint(0, len(alist))
+        print(j)
+        temp = clist[i]
+        clist[i] = clist[j]
+        clist[j] = temp
+    return alist, blist, clist
 
-    
+
+def time_sort_measuring(k, xlist, function):
+    time_xlist_k = []
     if k < 7:
-        for l in range(100):
-
+        val = 100
     else:
-        for l in range(10):
+        val = 10
+    for l in range(val):
+        if function is None:
+            before = time.time_ns()
+            xlist = xlist.sort()
+            interval = time.time_ns() - before
+        else:
+            before = time.time_ns()
+            xlist = function(xlist)
+            interval = time.time_ns() - before
+        time_xlist_k.append(interval)
+    return time_xlist_k
+
+
+sort_full = []
+insert_sort_full = []
+select_sort_full = []
+quick_sort_full = []
+
+full_list = [(None, sort_full), (insert_sort, insert_sort_full),
+             (select_sort, select_sort_full), (quick_sort, quick_sort_full)]
+
+for k in range(3, 11, 1):
+    a_list, b_list, c_list = int_list_generating(k)
+    print(a_list)
+    print(b_list)
+    print(c_list)
+    for function, array in full_list:
+        print(function, array)
+        sort_a_list_k = time_sort_measuring(k, a_list, function)
+        sort_b_list_k = time_sort_measuring(k, b_list, function)
+        sort_c_list_k = time_sort_measuring(k, c_list, function)
+        array.append(sort_a_list_k, sort_b_list_k, sort_c_list_k)
+
+print(full_list)
+
+
+
+
+
+
+
+
 
 
 
