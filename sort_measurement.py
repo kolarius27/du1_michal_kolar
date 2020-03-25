@@ -3,6 +3,7 @@ import time
 import math
 import csv
 import string
+import shutil
 
 
 def random_list_num(n):
@@ -80,67 +81,82 @@ def int_list_generating(k):
     return [alist, blist, clist]
 
 
-def time_sort_measuring(k, xlist, function, reader1, writer1, field_name):
-    if k < 7:
-        for row in reader1:
-            if function is None:
-                before = time.time_ns()
-                xlist.sort()
-                after = time.time_ns()
-                interval = after - before
+def time_sort_measuring(k, xlist, function, csv_file, new_csv_file, field_name):
+    with open(csv_file, 'r', encoding='utf-8', newline='') as csv_read:
+        reader1 = csv.reader(csv_read)
+
+        with open(new_csv_file, 'w', newline='') as csv_write:
+            writer1 = csv.writer(csv_write)
+
+            if k < 7:
+                next(reader1)
+                for row in reader1:
+                    if function is None:
+                        before = time.time_ns()
+                        xlist.sort()
+                        after = time.time_ns()
+                        interval = after - before
+                    else:
+                        before = time.time_ns()
+                        xlist = function(xlist)
+                        after = time.time_ns()
+                        interval = after - before
+                    print(row, field_name, interval)
+                    writer1.writerow(row + [interval])
             else:
-                before = time.time_ns()
-                xlist = function(xlist)
-                after = time.time_ns()
-                interval = after - before
-            print(row, field_name, interval)
-            writer1.writerow(next(reader1), {field_name: interval})
-    else:
-        for row in reader1[:11]:
-            if function is None:
-                before = time.time_ns()
-                xlist.sort()
-                after = time.time_ns()
-                interval = after - before
-            else:
-                before = time.time_ns()
-                xlist = function(xlist)
-                after = time.time_ns()
-                interval = after - before
-            writer1.writerow(next(reader1), {field_name: interval})
+                for row in reader1[:11]:
+                    if function is None:
+                        before = time.time_ns()
+                        xlist.sort()
+                        after = time.time_ns()
+                        interval = after - before
+                    else:
+                        before = time.time_ns()
+                        xlist = function(xlist)
+                        after = time.time_ns()
+                        interval = after - before
+                    writer1.writerow(row + [interval])
+    shutil.copyfile(new_csv_file, csv_file)
 
 
 functions = [None, select_sort, quick_sort]
 
-with open('sort_alg.csv', 'w', newline='') as csvfile2:
-    with open('sort_alg.csv', 'r', newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
+fieldnames_sort = ['iteration']
 
-        fieldnames_sort = ['iteration']
+for k in range(3, 6, 1):
+    print(k)
+    abc_list = int_list_generating(k)
+    for fc in functions:
+        for i in range(3):
+            if fc is None:
+                fieldname = str(k) + "_sort_" + string.ascii_lowercase[i]
+            else:
+                fieldname = str(k) + "_" + fc.__name__ + "_" + string.ascii_lowercase[i]
+            fieldnames_sort.append(fieldname)
 
-        for k in range(3, 6, 1):
-            print(k)
-            abc_list = int_list_generating(k)
-            for fc in functions:
-                for i in range(3):
-                    if fc is None:
-                        fieldname = str(k) + "_sort_" + string.ascii_lowercase[i]
-                    else:
-                        fieldname = str(k) + "_" + fc.__name__ + "_" + string.ascii_lowercase[i]
-                    fieldnames_sort.append(fieldname)
 
-        writer = csv.DictWriter(csvfile2, fieldnames=fieldnames_sort)
+with open('sort_alg.csv', 'w', newline='', encoding='utf-8') as csvfile:
+    writer = csv.writer(csvfile)
+    for i in range(1,101):
+        writer.writerow([i])
 
-        for i in range(1, 101):
-            writer.writerow({'iteration': i})
+with open('sort_alg.csv', 'r', newline='', encoding='utf-8') as csvfile1:
+    reader1 = csv.reader(csvfile1)
+    with open('new_sort_alg.csv', 'w', newline='', encoding='utf-8') as csvfile2:
+        writer2 = csv.writer(csvfile2)
+        for line in reader1:
+            writer2.writerow([line, [1]])
 
-        reader = csv.DictReader(csvfile)
-        print(reader)
+shutil.copyfile('new_sort_alg.csv', 'sort_alg.csv')
 
-        index = 1
-        for k in range(3,6,1):
-            [a_list, b_list, c_list] = int_list_generating(k)
-            for fc in functions:
-                for _list in [a_list, b_list, c_list]:
-                    time_sort_measuring(k, _list, fc, reader, writer, fieldnames_sort[index])
-                    index += 1
+
+
+
+breakpoint()
+index = 1
+for k in range(3,6,1):
+    [a_list, b_list, c_list] = int_list_generating(k)
+    for fc in functions:
+        for _list in [a_list, b_list, c_list]:
+            time_sort_measuring(k, _list, fc, 'sort_alg.csv', 'sort_alg_new.csv', fieldnames_sort[index])
+            index += 1
